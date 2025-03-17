@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000000;
+        }
+        .calculator-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .display-screen {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .button {
+            width: 65px;
+            height: 65px;
+            margin: 5px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .button.number { background: #ffffff; }
+        .button.operator { 
+            background: #007bff;
+            color: white;
+        }
+        .button.equals { 
+            background: #28a745;
+            color: white;
+        }
+        .button.memory {
+            background: #6c757d;
+            color: white;
+        }
+        .history-item {
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .history-item:hover {
+            background: #e9ecef;
+        }
+        #display {
+            font-size: 1.5rem;
+            text-align: right;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="calculator-container">
+            <h2 class="text-center mb-4">Kalkulator</h2>
+            <div class="display-screen">
+                <input type="text" class="form-control form-control-lg mb-2" id="display" readonly>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small id="memory" class="text-muted">Memory: 0</small>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#historyModal">
+                        <i class="bi bi-clock-history"></i> History
+                    </button>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="memoryClear()" class="button memory">MC</button>
+                    <button onclick="memoryRecall()" class="button memory">MR</button>
+                    <button onclick="memoryPlus()" class="button memory">M+</button>
+                    <button onclick="memoryMinus()" class="button memory">M-</button>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="appendToDisplay('7')" class="button number">7</button>
+                    <button onclick="appendToDisplay('8')" class="button number">8</button>
+                    <button onclick="appendToDisplay('9')" class="button number">9</button>
+                    <button onclick="appendToDisplay('/')" class="button operator">/</button>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="appendToDisplay('4')" class="button number">4</button>
+                    <button onclick="appendToDisplay('5')" class="button number">5</button>
+                    <button onclick="appendToDisplay('6')" class="button number">6</button>
+                    <button onclick="appendToDisplay('*')" class="button operator">×</button>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="appendToDisplay('1')" class="button number">1</button>
+                    <button onclick="appendToDisplay('2')" class="button number">2</button>
+                    <button onclick="appendToDisplay('3')" class="button number">3</button>
+                    <button onclick="appendToDisplay('-')" class="button operator">-</button>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="appendToDisplay('0')" class="button number">0</button>
+                    <button onclick="appendToDisplay('.')" class="button number">.</button>
+                    <button onclick="calculateResult()" class="button equals">=</button>
+                    <button onclick="appendToDisplay('+')" class="button operator">+</button>
+                </div>
+                <button onclick="clearEntry()" class="btn btn-danger w-100">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Calculation History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="historyList"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel untuk menyimpan nilai memori kalkulator
+        let memory = 0;
+        // Array untuk menyimpan riwayat perhitungan
+        let history = [];
+
+        // Fungsi untuk menambahkan angka atau operator ke layar kalkulator
+        function appendToDisplay(value) {
+            let display = document.getElementById('display');
+            if (display.value === 'Error') {
+                display.value = '';
+            }
+            display.value += value;
+        }
+
+        // Fungsi untuk menghapus nilai yang ada di layar kalkulator
+        function clearEntry() {
+            document.getElementById('display').value = '';
+        }
+
+        // Fungsi untuk menghitung hasil dari ekspresi matematika
+        function calculateResult() {
+            try {
+                let display = document.getElementById('display');
+                let expression = display.value;
+                
+                // Validate expression
+                if (!expression) return;
+                
+                // Mengevaluasi ekspresi matematika dengan aman
+                let result = Function('"use strict";return (' + expression + ')')();
+                
+                // Memeriksa apakah hasil perhitungan valid
+                if (!isFinite(result)) {
+                    throw new Error('Invalid calculation');
+                }
+                
+                // Round to 8 decimal places
+                result = Math.round(result * 100000000) / 100000000;
+                
+                display.value = result;
+                saveToHistory(expression, result);
+            } catch (error) {
+                document.getElementById('display').value = 'Error';
+            }
+        }
+
+        // Fungsi untuk memperbarui tampilan nilai memori
+        function updateMemoryDisplay() {
+            document.getElementById('memory').textContent = 'Memory: ' + memory;
+        }
+
+        // Fungsi untuk menambahkan nilai ke memori
+        function memoryPlus() {
+            let value = parseFloat(document.getElementById('display').value || 0);
+            memory += value;
+            updateMemoryDisplay();
+        }
+
+        // Fungsi untuk mengurangi nilai dari memori
+        function memoryMinus() {
+            let value = parseFloat(document.getElementById('display').value || 0);
+            memory -= value;
+            updateMemoryDisplay();
+        }
+
+        // Fungsi untuk menampilkan nilai memori ke layar
+        function memoryRecall() {
+            document.getElementById('display').value = memory;
+        }
+
+        // Fungsi untuk menghapus nilai memori
+        function memoryClear() {
+            memory = 0;
+            updateMemoryDisplay();
+        }
+
+        // Fungsi untuk menyimpan perhitungan ke riwayat
+        function saveToHistory(expression, result) {
+            let calculation = {
+                expression: expression,
+                result: result,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            history.unshift(calculation);
+            localStorage.setItem('calculatorHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // Fungsi untuk memuat dan menampilkan riwayat perhitungan
+        function loadHistory() {
+            let savedHistory = localStorage.getItem('calculatorHistory');
+            if (savedHistory) {
+                history = JSON.parse(savedHistory);
+            }
+            
+            let historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            history.forEach((item, index) => {
+                let historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">${item.expression} = ${item.result}</div>
+                            <small class="text-muted">${item.timestamp}</small>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="useHistory(${index})">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteHistoryItem(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Fungsi untuk menggunakan hasil dari riwayat
+        function useHistory(index) {
+            document.getElementById('display').value = history[index].result;
+        }
+
+        // Fungsi untuk menghapus item riwayat tertentu
+        function deleteHistoryItem(index) {
+            history.splice(index, 1);
+            localStorage.setItem('calculatorHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        // Fungsi untuk menghapus semua riwayat
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                history = [];
+                localStorage.removeItem('calculatorHistory');
+                loadHistory();
+            }
+        }
+
+        // Menjalankan fungsi loadHistory saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+    </script>
+</body>
+</html>
