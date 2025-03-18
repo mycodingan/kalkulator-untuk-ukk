@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #000000;
+            background: #f8f8f8;
         }
         .calculator-container {
             max-width: 400px;
@@ -90,6 +90,18 @@
             </div>
 
             <div class="buttons">
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="calculateTrig('sin')" class="button function">sin</button>
+                    <button onclick="calculateTrig('cos')" class="button function">cos</button>
+                    <button onclick="calculateTrig('tan')" class="button function">tan</button>
+                    <button onclick="calculateSqrt()" class="button function">√</button>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <button onclick="calculatePercentage()" class="button function">%</button>
+                    <button onclick="clearEntry()" class="button memory">C</button>
+                    <button onclick="appendToDisplay('0')" class="button number">0</button>
+                    <button onclick="calculateResult()" class="button equals">=</button>
+                </div>
                 <div class="d-flex justify-content-between mb-2">
                     <button onclick="memoryClear()" class="button memory">MC</button>
                     <button onclick="memoryRecall()" class="button memory">MR</button>
@@ -292,6 +304,33 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadHistory();
         });
+        function calculateTrig(func) {
+            let display = document.getElementById('display');
+            let value = parseFloat(display.value);
+            if (!isNaN(value)) {
+                let result;
+                if (func === 'sin') result = Math.sin(value * Math.PI / 180);
+                if (func === 'cos') result = Math.cos(value * Math.PI / 180);
+                if (func === 'tan') result = Math.tan(value * Math.PI / 180);
+                display.value = Math.round(result * 100000000) / 100000000;
+            }
+        }
+        function calculateSqrt() {
+            let display = document.getElementById('display');
+            let value = parseFloat(display.value);
+            if (!isNaN(value) && value >= 0) {
+                display.value = Math.sqrt(value);
+            } else {
+                display.value = 'Error';
+            }
+        }
+        function calculatePercentage() {
+            let display = document.getElementById('display');
+            let value = parseFloat(display.value);
+            if (!isNaN(value)) {
+                display.value = value / 100;
+            }
+        }
     </script>
 </body>
 </html>
